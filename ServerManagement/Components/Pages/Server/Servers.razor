@@ -1,0 +1,127 @@
+﻿@page "/servers"
+@using System.Text
+@using System.Globalization
+
+@inject NavigationManager NavigationManager
+
+<h2>
+    Servers
+
+    <a href="/servers/add" class="btn btn-primary m-2" style="width:120px;">Add</a>
+</h2>
+<br />
+<br />
+
+<div class="container-fluid text-center mb-4">
+    <div class="row w-60">
+
+        @foreach (var city in cities)
+        {
+            <div class="col mb-2">
+                <div class="card" style="width: 12rem;">
+                    <img src="@CityImage(city)" alt="@city" class="card-img-top" />
+                    <div class="card-body">
+                        <EditForm Model="servers"
+                                  FormName="@($"form-server-{CityName(city)}")"
+                                  OnSubmit="@(() => { GetCityServers(city); })"
+                                  >
+                            <button type="submit"
+                                    class="btn btn-primary"
+                                   >
+                                @city
+                            </button>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+</div>
+<br />
+
+<ServerComponent />
+<br />
+
+<h4>Servers de @servers[0].City</h4>
+<hr />
+<ul>
+    @foreach (var server in servers)
+    {
+        <li>
+            @server.Name in @server.City is
+            <span style="color:@(@server.IsOnline ? "green" : "red")">
+                <strong>@(@server.IsOnline ? "Up" : "Down")</strong>
+            </span>
+            &nbsp;
+            <a href="servers/@server.Id" class="btn btn-link">Edit</a>
+            &nbsp;
+            <EditForm Model="server" 
+                      FormName="@($"form-server-{server.Id}")"
+                      OnValidSubmit="@(() => {DeleteServer(server.Id);} )">
+                <button type="submit" class="btn btn-link">Delete</button>
+            </EditForm>
+        </li>
+    }
+</ul>
+
+@code {
+
+    private List<Server> servers { get; set; }
+    private List<string> cities { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        servers ??= ServersRepository.GetServersByCity("São Paulo");
+        cities ??= CitiesRepository.GetCities();
+    }
+
+    private string CityName(string city)
+    {
+        if (string.IsNullOrWhiteSpace(city))
+            throw new ArgumentException("City name cannot be null or empty", nameof(city));
+
+        // Remove acentos e outros caracteres especiais
+        var normalizedCity = city.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
+
+        foreach (var c in normalizedCity)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+
+        var cityName = stringBuilder
+            .ToString()
+            .Normalize(NormalizationForm.FormC)
+            .ToLower()
+            .Replace(' ', '-');
+
+        return cityName;
+    }
+    private string CityImage(string city)
+    {
+        var cityName = CityName(city);
+
+        return $"images/{cityName}.png";
+    }
+
+    private void GetCityServers(string city)
+    {
+        servers = ServersRepository.GetServersByCity(city);
+        StateHasChanged(); // Necessário para atualizar a UI
+    }
+
+    private void DeleteServer(int id)
+    {
+        if (id > 0)
+        {
+            ServersRepository.DeleteServer(id);
+            NavigationManager.NavigateTo("/servers", true);
+        }
+    }
+}
