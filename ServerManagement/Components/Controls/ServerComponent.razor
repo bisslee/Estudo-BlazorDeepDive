@@ -1,4 +1,5 @@
-﻿@if (server != null)
+﻿
+@if (server != null)
 {
     <div data-name="@server.Name"
          data-status="@(server.IsOnline? "UP": "Down")"
@@ -12,7 +13,6 @@
         
         >Turn On/Off</button>
     </div>
-
 }
 @code {
 
