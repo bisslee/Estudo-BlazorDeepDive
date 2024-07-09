@@ -1,37 +1,31 @@
 ﻿@if (server != null)
 {
-    <EditForm Enhance="true" Model="server" FormName="serverComponentForm" OnSubmit="ChangeStatus">
-        <InputNumber @bind-Value="server.Id" hidden />
-        <InputText @bind-Value="server.Name" hidden />
-        <InputText @bind-Value="server.City" hidden />
-        <InputCheckbox @bind-Value="server.IsOnline" hidden />
+    <div data-name="@server.Name"
+         data-status="@(server.IsOnline? "UP": "Down")"
+         style="@($"color:{(server.IsOnline? "green" : "red")}")">
+        Server @server.Name in @server.City is @(server.IsOnline ? "UP" : "Down") at  @DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")
+        &nbsp;
+        <button 
+            class="btn btn-primary" 
+            type="button"
+            @onclick="ChangeStatus"
+        
+        >Turn On/Off</button>
+    </div>
 
-        <div data-name="@server.Name"
-             data-status="@(server.IsOnline? "UP": "Down")"
-             style="@($"color:{(server.IsOnline? "green" : "red")}")">
-            Server @server.Name in @server.City is @(server.IsOnline ? "UP" : "Down") at  @DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")
-            &nbsp;
-            <button class="btn btn-primary" type="submit">Turn On/Off</button>
-        </div>
-    </EditForm>
 }
 @code {
 
-    [SupplyParameterFromForm]
-    private Server? server { get;set; }
-
-    protected override void OnParametersSet()
-    {
-        server ??= new Server()
+    private Server? server = new Server()
         {
             Name = "Server 1",
             City = "São Paulo",
         };
-    }
 
     private void ChangeStatus()
     {
         if(server != null)
-            server.IsOnline = !server.IsOnline;
+            server.IsOnline = !server.IsOnline;        
     }
+
 }
