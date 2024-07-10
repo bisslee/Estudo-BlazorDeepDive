@@ -72,9 +72,14 @@ usando aqui só qdo lembrar de usar.
 <h4>@SelectedCity</h4>
 <hr />
 <ul>
-    @foreach (var server in servers)
-    {
-        <li>
+   @*  @foreach (var server in servers)
+       usando o Viurualize para ver o conteudo da variavel servers
+       só recomendado quando tem muuuuuitos itens.
+       Vou manter, mas prefiro usar a paginação.
+    { *@
+
+    <Virtualize Items="this.servers" Context="server">
+        <li @key="server.Id">
             @server.Name in @server.City is
             <span style="color:@(@server.IsOnline ? "green" : "red")">
                 <strong>@(@server.IsOnline ? "Up" : "Down")</strong>
@@ -88,7 +93,8 @@ usando aqui só qdo lembrar de usar.
                 <button type="submit" class="btn btn-link">Delete</button>
             </EditForm>
         </li>
-    }
+    </Virtualize>
+    @* } *@
 </ul>
 
 @code {
