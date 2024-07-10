@@ -29,7 +29,7 @@ namespace ServerManagement.Models
             server.Id = maxId + 1;
             servers.Add(server);
         }
-        public static List<Server> GetServres() => servers;
+        public static List<Server> GetServers() => servers;
 
         public static List<Server> GetServersByCity(string cityName)
         {

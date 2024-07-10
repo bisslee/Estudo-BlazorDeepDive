@@ -4,6 +4,8 @@
 
 @inject NavigationManager NavigationManager
 
+@rendermode InteractiveServer
+
 <h2>
     Servers
 
@@ -17,20 +19,24 @@
 
         @foreach (var city in cities)
         {
+            
             <div class="col mb-2">
-                <div class="card" style="width: 12rem;">
+                <div class="card @(
+                    SelectedCity == city ? "border-primary" : "border-secondary"    
+                        )" style="width: 12rem;">
                     <img src="@CityImage(city)" alt="@city" class="card-img-top" />
                     <div class="card-body">
-                        <EditForm Model="servers"
+                       @*  <EditForm Model="servers"
                                   FormName="@($"form-server-{CityName(city)}")"
                                   OnSubmit="@(() => { GetCityServers(city); })"
-                                  >
+                                  > *@
                             <button type="submit"
                                     class="btn btn-primary"
+                                    @onclick="(() => { GetCityServers(city); })"
                                    >
                                 @city
                             </button>
-                        </EditForm>
+                        @* </EditForm> *@
                     </div>
                 </div>
             </div>
@@ -38,12 +44,31 @@
         }
     </div>
 </div>
+@* 
+<ServerComponent  />
+@* <ServerComponent @rendermode="InteractiveServer" />
+usando aqui só qdo lembrar de usar.
+ *@
+<br />
+<div class="input-group mb3">
+    <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Search By Server Name"
+        @onchange="HandleServerFilterChange"
+    />
+    <button 
+        class="btn btn-outline-secondary" 
+        type="button"
+        id="bt-search"
+        @onclick="HandleSearch"
+    >
+        <i class="bi bi-search"> Search</i>
+    </button>
+</div>
 <br />
 
-<ServerComponent />
-<br />
-
-<h4>Servers de @servers[0].City</h4>
+<h4>@SelectedCity</h4>
 <hr />
 <ul>
     @foreach (var server in servers)
@@ -67,15 +92,11 @@
 
 @code {
 
-    private List<Server> servers { get; set; }
-    private List<string> cities { get; set; }
+    private string SelectedCity  = "São Paulo";
+    private List<Server> servers { get; set; } = ServersRepository.GetServersByCity("São Paulo");
+    private List<string> cities { get; set; } = CitiesRepository.GetCities();
 
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        servers ??= ServersRepository.GetServersByCity("São Paulo");
-        cities ??= CitiesRepository.GetCities();
-    }
+    private string serverFilter = string.Empty;
 
     private string CityName(string city)
     {
@@ -112,8 +133,8 @@
 
     private void GetCityServers(string city)
     {
-        servers = ServersRepository.GetServersByCity(city);
-        StateHasChanged(); // Necessário para atualizar a UI
+        this.SelectedCity = city;
+        this.servers = ServersRepository.GetServersByCity(this.SelectedCity);
     }
 
     private void DeleteServer(int id)
@@ -123,5 +144,20 @@
             ServersRepository.DeleteServer(id);
             NavigationManager.NavigateTo("/servers", true);
         }
+    }
+
+
+    private void HandleServerFilterChange(ChangeEventArgs e)
+    {
+        serverFilter = e.Value?.ToString() ?? string.Empty;
+        // this.servers = ServersRepository.GetServersByCity(SelectedCity)
+        //     .Where(s => s.Name.Contains(serverFilter, StringComparison.OrdinalIgnoreCase))
+        //     .ToList();
+    }
+
+    private void HandleSearch()
+    {
+        this.servers = ServersRepository.SearchServers(serverFilter);
+        this.SelectedCity = "Search Results";
     }
 }
