@@ -55,8 +55,9 @@ usando aqui só qdo lembrar de usar.
         type="text" 
         class="form-control" 
         placeholder="Search By Server Name"
-        @onchange="HandleServerFilterChange"
-    />
+           @bind-value="ServerFilter"
+           @bind-value:event="oninput"
+           />
     <button 
         class="btn btn-outline-secondary" 
         type="button"
@@ -96,7 +97,28 @@ usando aqui só qdo lembrar de usar.
     private List<Server> servers { get; set; } = ServersRepository.GetServersByCity("São Paulo");
     private List<string> cities { get; set; } = CitiesRepository.GetCities();
 
-    private string serverFilter = string.Empty;
+    private string serverFilter = "";
+    private string ServerFilter
+    {
+        get => serverFilter;
+        
+        set
+        {
+            serverFilter = value;
+            if (string.IsNullOrWhiteSpace(serverFilter))
+            {
+                this.SelectedCity = "São Paulo";
+                this.servers = ServersRepository.GetServersByCity(this.SelectedCity);
+                return;
+            }
+            this.servers = ServersRepository.SearchServers(serverFilter);
+            var total = this.servers.Count;
+            if (total > 0)
+                this.SelectedCity = $"Search Results:{total}";
+            else
+                this.SelectedCity = "No results found";
+        }
+    }
 
     private string CityName(string city)
     {
@@ -147,17 +169,13 @@ usando aqui só qdo lembrar de usar.
     }
 
 
-    private void HandleServerFilterChange(ChangeEventArgs e)
-    {
-        serverFilter = e.Value?.ToString() ?? string.Empty;
-        // this.servers = ServersRepository.GetServersByCity(SelectedCity)
-        //     .Where(s => s.Name.Contains(serverFilter, StringComparison.OrdinalIgnoreCase))
-        //     .ToList();
-    }
-
     private void HandleSearch()
     {
-        this.servers = ServersRepository.SearchServers(serverFilter);
-        this.SelectedCity = "Search Results";
+        this.servers = ServersRepository.SearchServers(ServerFilter);
+        var total = this.servers.Count;
+        if (total > 0)
+            this.SelectedCity = $"Search Results:{total}";
+        else
+            this.SelectedCity = "No results found";
     }
 }
