@@ -1,0 +1,56 @@
+﻿@inject NavigationManager NavigationManager
+@if (servers != null && servers.Count > 0)
+{
+    <h4>Found: @servers.Count</h4>
+    <hr />
+
+    <ul>
+        @*  @foreach (var server in servers)
+    usando o Viurualize para ver o conteudo da variavel servers
+    só recomendado quando tem muuuuuitos itens.
+    Vou manter, mas prefiro usar a paginação.
+    { *@
+
+        <Virtualize Items="this.servers" Context="server">
+            <ServerComponent Server="server" />
+        </Virtualize>
+        @* } *@
+    </ul>
+}
+else
+{
+    <h4>No Servers found</h4>
+}
+
+
+@code {
+
+    [Parameter]
+    public string? CityName { get; set; }
+
+    [Parameter]
+    public string SearchFilter { get; set; } = "";
+
+    private string SelectedCity = "";
+    private List<Server>? servers;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(SearchFilter))
+        {
+            servers = ServersRepository.SearchServers(SearchFilter);
+        }
+        else if(!string.IsNullOrWhiteSpace(CityName))
+        {
+            SelectedCity = CityName;
+            servers = ServersRepository.GetServersByCity(CityName);
+        }
+        else
+        {
+            servers = ServersRepository.GetServers();
+        }
+         
+    }
+
+
+}

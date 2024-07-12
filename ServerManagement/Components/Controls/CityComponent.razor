@@ -1,0 +1,70 @@
+﻿@using System.Text
+@using System.Globalization
+
+@if(!string.IsNullOrWhiteSpace(City))
+{
+ <div class="col mb-2">
+    <div class="card @(
+                    SelectedCity == City ? "border-primary" : "border-secondary"
+                        )" style="width: 12rem;">
+        <img src="@CityImage(City)" alt="@City" class="card-img-top" />
+        <div class="card-body">
+            <button type="submit"
+                    class="btn btn-primary"
+                    @onclick="(() => { GetCityServers(City); })">
+                @City
+            </button>
+        </div>
+    </div>
+</div>
+}
+@code {
+
+    [Parameter]
+    public string? City { get; set; }
+
+    [Parameter]
+    public string? SelectedCity { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnCitySelected { get; set; }
+
+    private string CityName(string city)
+    {
+        if (string.IsNullOrWhiteSpace(city))
+            throw new ArgumentException("City name cannot be null or empty", nameof(city));
+
+        // Remove acentos e outros caracteres especiais
+        var normalizedCity = city.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
+
+        foreach (var c in normalizedCity)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+
+        var cityName = stringBuilder
+            .ToString()
+            .Normalize(NormalizationForm.FormC)
+            .ToLower()
+            .Replace(' ', '-');
+
+        return cityName;
+    }
+    private string CityImage(string city)
+    {
+        var cityName = CityName(city);
+
+        return $"images/{cityName}.png";
+    }
+
+    private void GetCityServers(string city)
+    {
+        this.SelectedCity = city;
+        this.OnCitySelected.InvokeAsync(city);
+    }
+}

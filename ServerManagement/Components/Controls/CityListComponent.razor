@@ -1,0 +1,45 @@
+﻿
+
+@if (cities != null && cities.Count > 0)
+{
+    <h2>Cidades com servidores @cities.Count</h2>
+    <div class="container flex text-center  mb-4">
+        <div class="row w-{840px}">
+
+            @foreach (var city in cities)
+            {
+                <CityComponent 
+                    City="@city" 
+                    SelectedCity="@SelectedCity" 
+                    OnCitySelected="HandleCitySelected"
+                />
+            }
+        </div>
+    </div>
+}
+else
+{
+    <h2>No Cities found</h2>
+}
+@code {
+    [Parameter]
+    public EventCallback<string> OnCitySelected { get; set; }
+
+    public void ClearSelectedCity()
+    {
+        SelectedCity = string.Empty;
+    }
+
+    private string SelectedCity = "São Paulo";
+
+    public List<string> cities = CitiesRepository.GetCities();
+
+
+    private void HandleCitySelected(string city)
+    {
+        SelectedCity = city;
+        OnCitySelected.InvokeAsync(city);
+    }
+
+
+}

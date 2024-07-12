@@ -1,6 +1,5 @@
 ﻿@page "/servers"
-@using System.Text
-@using System.Globalization
+
 
 @inject NavigationManager NavigationManager
 
@@ -8,180 +7,53 @@
 
 <h2>
     Servers
-
     <a href="/servers/add" class="btn btn-primary m-2" style="width:120px;">Add</a>
 </h2>
 <br />
+<CityListComponent 
+    @ref="cityListComponent"
+    @rendermode="InteractiveServer"    
+    OnCitySelected="HandleCitySelected" 
+/>
 <br />
 
-<div class="container-fluid text-center mb-4">
-    <div class="row w-60">
-
-        @foreach (var city in cities)
-        {
-            
-            <div class="col mb-2">
-                <div class="card @(
-                    SelectedCity == city ? "border-primary" : "border-secondary"    
-                        )" style="width: 12rem;">
-                    <img src="@CityImage(city)" alt="@city" class="card-img-top" />
-                    <div class="card-body">
-                       @*  <EditForm Model="servers"
-                                  FormName="@($"form-server-{CityName(city)}")"
-                                  OnSubmit="@(() => { GetCityServers(city); })"
-                                  > *@
-                            <button type="submit"
-                                    class="btn btn-primary"
-                                    @onclick="(() => { GetCityServers(city); })"
-                                   >
-                                @city
-                            </button>
-                        @* </EditForm> *@
-                    </div>
-                </div>
-            </div>
-
-        }
-    </div>
-</div>
-@* 
+@*
 <ServerComponent  />
 @* <ServerComponent @rendermode="InteractiveServer" />
 usando aqui só qdo lembrar de usar.
  *@
 <br />
-<div class="input-group mb3">
-    <input 
-        type="text" 
-        class="form-control" 
-        placeholder="Search By Server Name"
-           @bind-value="ServerFilter"
-           @bind-value:event="oninput"
-           />
-    <button 
-        class="btn btn-outline-secondary" 
-        type="button"
-        id="bt-search"
-        @onclick="HandleSearch"
-    >
-        <i class="bi bi-search"> Search</i>
-    </button>
-</div>
-<br />
+<SearchComponent 
+    @ref="searchComponent"
+    @rendermode="InteractiveServer" 
+    OnSearch="HandleFilterSearch" 
+ />
 
-<h4>@SelectedCity</h4>
+<ServerListComponent 
+    @rendermode="InteractiveServer"
+    CityName="@SelectedCity"
+    SearchFilter="@SearchFilter" />
 <hr />
-<ul>
-   @*  @foreach (var server in servers)
-       usando o Viurualize para ver o conteudo da variavel servers
-       só recomendado quando tem muuuuuitos itens.
-       Vou manter, mas prefiro usar a paginação.
-    { *@
 
-    <Virtualize Items="this.servers" Context="server">
-        <li @key="server.Id">
-            @server.Name in @server.City is
-            <span style="color:@(@server.IsOnline ? "green" : "red")">
-                <strong>@(@server.IsOnline ? "Up" : "Down")</strong>
-            </span>
-            &nbsp;
-            <a href="servers/@server.Id" class="btn btn-link">Edit</a>
-            &nbsp;
-            <EditForm Model="server" 
-                      FormName="@($"form-server-{server.Id}")"
-                      OnValidSubmit="@(() => {DeleteServer(server.Id);} )">
-                <button type="submit" class="btn btn-link">Delete</button>
-            </EditForm>
-        </li>
-    </Virtualize>
-    @* } *@
-</ul>
 
 @code {
 
-    private string SelectedCity  = "São Paulo";
-    private List<Server> servers { get; set; } = ServersRepository.GetServersByCity("São Paulo");
-    private List<string> cities { get; set; } = CitiesRepository.GetCities();
+    private string SelectedCity = "São Paulo";
+    private string SearchFilter = "";
 
-    private string serverFilter = "";
-    private string ServerFilter
+    private CityListComponent? cityListComponent;
+    private SearchComponent? searchComponent;
+
+    private void HandleCitySelected(string city)
     {
-        get => serverFilter;
-        
-        set
-        {
-            serverFilter = value;
-            if (string.IsNullOrWhiteSpace(serverFilter))
-            {
-                this.SelectedCity = "São Paulo";
-                this.servers = ServersRepository.GetServersByCity(this.SelectedCity);
-                return;
-            }
-            this.servers = ServersRepository.SearchServers(serverFilter);
-            var total = this.servers.Count;
-            if (total > 0)
-                this.SelectedCity = $"Search Results:{total}";
-            else
-                this.SelectedCity = "No results found";
-        }
+        SelectedCity = city;
+        SearchFilter = string.Empty;
+        searchComponent?.ClearFilter();
     }
 
-    private string CityName(string city)
+    private void HandleFilterSearch(string filter)
     {
-        if (string.IsNullOrWhiteSpace(city))
-            throw new ArgumentException("City name cannot be null or empty", nameof(city));
-
-        // Remove acentos e outros caracteres especiais
-        var normalizedCity = city.Normalize(NormalizationForm.FormD);
-        var stringBuilder = new StringBuilder();
-
-        foreach (var c in normalizedCity)
-        {
-            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
-            {
-                stringBuilder.Append(c);
-            }
-        }
-
-        var cityName = stringBuilder
-            .ToString()
-            .Normalize(NormalizationForm.FormC)
-            .ToLower()
-            .Replace(' ', '-');
-
-        return cityName;
-    }
-    private string CityImage(string city)
-    {
-        var cityName = CityName(city);
-
-        return $"images/{cityName}.png";
-    }
-
-    private void GetCityServers(string city)
-    {
-        this.SelectedCity = city;
-        this.servers = ServersRepository.GetServersByCity(this.SelectedCity);
-    }
-
-    private void DeleteServer(int id)
-    {
-        if (id > 0)
-        {
-            ServersRepository.DeleteServer(id);
-            NavigationManager.NavigateTo("/servers", true);
-        }
-    }
-
-
-    private void HandleSearch()
-    {
-        this.servers = ServersRepository.SearchServers(ServerFilter);
-        var total = this.servers.Count;
-        if (total > 0)
-            this.SelectedCity = $"Search Results:{total}";
-        else
-            this.SelectedCity = "No results found";
+        SearchFilter = filter;
+        cityListComponent?.ClearSelectedCity();
     }
 }
