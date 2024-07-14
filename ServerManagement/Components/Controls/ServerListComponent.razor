@@ -1,27 +1,29 @@
 ﻿@inject NavigationManager NavigationManager
-@if (servers != null && servers.Count > 0)
-{
-    <h4>Found: @servers.Count</h4>
-    <hr />
+<h4>Found: @servers.Count</h4>
+<hr />
 
-    <ul>
-        @*  @foreach (var server in servers)
-    usando o Viurualize para ver o conteudo da variavel servers
-    só recomendado quando tem muuuuuitos itens.
-    Vou manter, mas prefiro usar a paginação.
-    { *@
-
-        <Virtualize Items="this.servers" Context="server">
+<table class="table table-striped">
+    <RepeaterComponent Items="servers">
+        <Header>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>City</th>
+                <th>Status</th>
+                <th>Users Online</th>
+                <th colspan="3">Actions</th>
+            </tr>
+        </Header>
+        <Row Context="server">
             <ServerComponent Server="server" />
-        </Virtualize>
-        @* } *@
-    </ul>
-}
-else
-{
-    <h4>No Servers found</h4>
-}
-
+        </Row>
+        <Empty>
+            <tr>
+                <td colspan="6">No Servers found</td>
+            </tr>
+        </Empty>
+    </RepeaterComponent>
+</table>
 
 @code {
 
@@ -40,7 +42,7 @@ else
         {
             servers = ServersRepository.SearchServers(SearchFilter);
         }
-        else if(!string.IsNullOrWhiteSpace(CityName))
+        else if (!string.IsNullOrWhiteSpace(CityName))
         {
             SelectedCity = CityName;
             servers = ServersRepository.GetServersByCity(CityName);
@@ -49,7 +51,7 @@ else
         {
             servers = ServersRepository.GetServers();
         }
-         
+
     }
 
 

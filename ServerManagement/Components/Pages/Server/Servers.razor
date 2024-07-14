@@ -10,11 +10,9 @@
     <a href="/servers/add" class="btn btn-primary m-2" style="width:120px;">Add</a>
 </h2>
 <br />
-<CityListComponent 
-    @ref="cityListComponent"
-    @rendermode="InteractiveServer"    
-    OnCitySelected="HandleCitySelected" 
-/>
+<CityListComponent @ref="cityListComponent"
+                   @rendermode="InteractiveServer"
+                   OnCitySelected="HandleCitySelected" />
 <br />
 
 @*
@@ -25,15 +23,19 @@ usando aqui só qdo lembrar de usar.
 <br />
 <SearchComponent 
     @ref="searchComponent"
-    @rendermode="InteractiveServer" 
-    OnSearch="HandleFilterSearch" 
- />
-
-<ServerListComponent 
     @rendermode="InteractiveServer"
-    CityName="@SelectedCity"
-    SearchFilter="@SearchFilter" />
-<hr />
+    OnSearch="HandleFilterSearch" 
+/>
+
+<CascadingValue Name="SelectedCity" Value="@SelectedCity">
+    <ServerListComponent 
+        @rendermode="InteractiveServer"
+        CityName="@SelectedCity"
+        SearchFilter="@SearchFilter" 
+     />
+
+</CascadingValue>
+
 
 
 @code {

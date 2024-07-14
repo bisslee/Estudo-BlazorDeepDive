@@ -1,5 +1,5 @@
 ﻿
-<div class="input-group mb3">
+<div class="input-group mb3 input-width" @attributes=OtherAttributes>
     <input type="text"
            class="form-control"
            placeholder="Search By Server Name"
@@ -18,6 +18,9 @@
 
     [Parameter]
     public EventCallback<string> OnSearch { get; set; }
+
+    [Parameter(CaptureUnmatchedValues =true)]
+    public Dictionary<string, object>? OtherAttributes { get; set; }
 
     public void ClearFilter()
     {

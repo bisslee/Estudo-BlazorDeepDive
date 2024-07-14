@@ -13,38 +13,30 @@
         <DataAnnotationsValidator></DataAnnotationsValidator>
 
         <InputNumber @bind-Value="server.Id" hidden />
-        <div class="row mb-3">
-            <div class="col-2">
-                <label class="form-label">Name</label>
-            </div>
-            <div class="col-6">
+
+        <FieldComponent Label="Name">
+            <Control>
                 <InputText @bind-Value="server.Name" class="form-control" />
-            </div>
-            <div class="col">
+            </Control>
+            <ValidationControl>
                 <ValidationMessage For="()=> server.Name" />
-            </div>
+            </ValidationControl>
+        </FieldComponent>
 
-        </div>
-        <div class="row mb-3">
-            <div class="col-2">
-                <label class="form-label">City</label>
-            </div>
-            <div class="col-6">
+        <FieldComponent Label="City">
+            <Control>
                 <InputText @bind-Value="server.City" class="form-control" />
-            </div>
-            <div class="col">
+            </Control>
+            <ValidationControl>
                 <ValidationMessage For="()=> server.City" />
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-2">
-                <label class="form-label">Online?</label>
-            </div>
-            <div class="col-6">
-                <InputCheckbox @bind-Value="server.IsOnline" class="form-check-input" />
-            </div>
+            </ValidationControl>
+        </FieldComponent>
 
-        </div>
+        <FieldComponent Label="Online?">
+            <Control>
+                <InputCheckbox @bind-Value="server.IsOnline" class="form-check-input" />
+            </Control>
+        </FieldComponent>
 
         <ValidationSummary />
 
@@ -75,11 +67,11 @@
         }
         try
         {
-            NavigationManager.NavigateTo("/servers", true); 
+            NavigationManager.NavigateTo("/servers", true);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-        }       
+        }
     }
 }
